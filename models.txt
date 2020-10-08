@@ -1,0 +1,28 @@
+auction_listing:
+    id -> int
+    title -> charfield
+    images -> 
+    author_id -> int
+    description -> charfield
+    price -> int
+    category -> charfield
+    sold : -> boolean
+    publication_date: -> date
+    deadline
+
+bids:
+    bid_id -> int  
+    auction_id -> int
+    user_id -> int
+    price -> int
+
+
+comments:
+    id -> int
+    title -> charfield
+    content -> charfield
+    user_id -> int
+    auction_id int
+
+user:
+    user_id
