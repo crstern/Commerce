@@ -4,11 +4,13 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 from django.contrib.auth.models import User
-from .forms import AuctionForm, CommentForm
+from .forms import AuctionForm, CommentForm, BidForm
 from .models import User, Auction, Bid, Comment
 from datetime import datetime
-from django.utils.timezone import now
-from .helper import get_acuction_context
+from datetime import datetime
+from .helper import get_auction_context, can_be_sold
+from django.contrib import messages
+
 
 
 def index(request):
@@ -70,6 +72,7 @@ def register(request):
 
 
 def create(request):
+    print("yo")
     if request.method == "POST":
         form = AuctionForm(request.POST)
         if form.is_valid():
@@ -80,21 +83,28 @@ def create(request):
                             image = form.cleaned_data["image"],
                             category = form.cleaned_data["category"],
                             author = auth.get_user(request),
-                            publication_date = now,
-                            isSold = False)
+                            publication_date = datetime.now(),
+                            is_sold = False)
             auction.save()
             return HttpResponseRedirect(reverse("auctions:index"))
         else:
             print(form.errors)
             return HttpResponse(form.errors)
     else:
-        context = {} 
-        context['form'] = AuctionForm()
-        return render(request, "auctions/create.html", context)    
+        print("yes")
+        return render(request, "auctions/create.html")   
+
+
+def bad_bid_error(request, auction_id):
+    context = {}
+    price = Auction.objects.filter(id=auction_id)[0].min_price
+    context["message"] = "You have to bid at least US $" + str(price)
+    context["auction_id"] = auction_id
+    return render(request, "auctions/error.html", context)
 
 
 def auction(request, auction_id):
-    context = get_acuction_context(request, auction_id)
+    context = get_auction_context(request, auction_id)
     user = context["user"]
     auction_details = context["details"]
     if user.is_authenticated:
@@ -117,11 +127,11 @@ def add_to_watchlist(request, auction_id):
     else:
         user.watchlist.add(auction_details)
 
-    return auction(request, auction_id)   
+    return HttpResponseRedirect(reverse("auctions:auction", kwargs={'auction_id':auction_id}))
 
 
 def add_comment(request, auction_id):
-    context = get_acuction_context(request, auction_id)
+    context = get_auction_context(request, auction_id)
     form = CommentForm(request.POST)
     
     if form.is_valid():
@@ -130,20 +140,44 @@ def add_comment(request, auction_id):
             user = context["user"],
             title = form.cleaned_data["title"],
             content = form.cleaned_data["content"],
-            auction = context["details"]
+            auction = context["details"],
+            min_price = context["min_price"]
             )
-        comment.save() 
+        comment.save()
+        context["details"].comments.add(comment)
     else:
-        print(form.errors)
         return HttpResponse(form.errors)
-
-    return auction(request, auction_id)
-
+    return HttpResponseRedirect(reverse("auctions:auction", kwargs={'auction_id':auction_id}))
 
 
+def bid_auction(request, auction_id):
+    context = get_auction_context(request, auction_id)
+    form = BidForm(request.POST)
+
+    if form.is_valid() and form.cleaned_data["price"] >= context["min_price"]:
+        bid = Bid(
+            price = form.cleaned_data["price"],
+            auctuion = context["details"],
+            user = context["user"]
+        )
+        bid.save()
+        context["details"].bids.add(bid)
+    else:
+        print("no")
+        context["message"] = "Invalid price!"
+        return HttpResponseRedirect(reverse("auctions:bad_bid_error", kwargs={'auction_id':auction_id}))
 
 
+    return HttpResponseRedirect(reverse("auctions:auction", kwargs={'auction_id':auction_id}))
 
+
+def sell_auction(request, auction_id):
+    context = get_auction_context(request, auction_id)
+    auction_details = Auction.objects.get(id=auction_id)
+    setattr(auction_details, "is_sold", True)
+    setattr(auction_details, "winner", context["winner"])
+    auction_details.save()
+    return HttpResponseRedirect(reverse("auctions:auction", kwargs={'auction_id':auction_id}))
 
 
 

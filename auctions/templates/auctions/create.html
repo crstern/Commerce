@@ -1,8 +1,5 @@
 {% extends 'auctions/layout.html' %}
 
-{% block title %}
-    Create Listing
-{% endblock %}
 
 {% block body%}
     <h1> Create a listing </h1>
@@ -11,7 +8,7 @@
         <div>{{message}}</div>
     {% endif %}
 
-    <form action="{% url 'create' %}" method="POST">
+    <form action="{% url 'auctions:create' %}" method="POST">
         {% csrf_token %}
         <div class="form-group">
             <div class="form-group">
@@ -45,10 +42,6 @@
             </div>
             
         </div>
-        <!-- {{form}}
-        <div class="form-group col-3">
-            <input class="form-control col-6" type="submit" name="submit">
-        </div> -->
         
     </form>
 

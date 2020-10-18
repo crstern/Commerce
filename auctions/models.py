@@ -14,9 +14,11 @@ class Auction(models.Model):
     image = models.URLField()
     category = models.CharField(max_length=64)
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="authors")
-    isSold = models.BooleanField(default=False)
-    publication_date = models.DateTimeField()
+    is_sold = models.BooleanField(default=False)
+    publication_date = models.DateTimeField( null=True, blank=True)
     comments = models.ManyToManyField("Comment", related_name="comments")
+    winner = models.ForeignKey(User, on_delete=models.CASCADE, default=None, related_name="winner", null=True, blank=True)
+
     
 
 class Bid(models.Model):

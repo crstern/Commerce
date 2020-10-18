@@ -1,0 +1,79 @@
+{% extends 'auctions/layout.html' %}
+
+{% block body %}
+    <div class="card p-3 flex-wrap flex-row">
+        <img src="{{details.image}}" alt="Photo of the product" style="max-width: 30rem; max-height: 500px;"/>
+        <div class="card-block px-2">
+            <h5 class="card-title">{{details.name}}</h5>
+            <p class="card-text">{{details.description}} </p>
+            <p class="card-text">Initial price: US ${{details.price}}</p>
+            <form action="{% url 'auctions:add_to_watchlist' auction%}" method="POST" style={{style}}>
+                    {%csrf_token%}
+                    <input type="submit" name="add_to_watchlist" id="" value="{{button}}">                    
+            </form>    
+        <div class="card-block px-2 container">
+            {% if is_sold == False %}
+
+                {% if can_bid == True %}
+                    <form action="{% url 'auctions:bid_auction' auction %}" method="POST" style={{style}}>
+                        {%csrf_token%}
+                        <label>Enter US ${{min_price}} or more</label>
+                        {{bid_form}}
+                        <input type="submit" value="Place Bid" class="btn btn-secondary mb-2"> 
+                    </form>
+                    {% if message %}
+                        <div>{{ message }}</div>
+                    {% endif %}
+                {% endif %}
+                
+                {% if sell_form %}
+                    <form action="{% url 'auctions:sell_auction' auction %}" method="POST">
+                        {%csrf_token%}
+                        <input type="submit" name="sell_auction" value="Sell auction for US ${{min_price}}">
+                    </form>
+                {% elif details.author == user %}
+                    <div style={{style}}>You have no one to sell this item to</div>
+                {% endif %}
+
+                <div>Status: active</div>
+            {% else %}
+                <div>Status: sold</div>
+
+                {% if winner == user %}
+                    <div>You won this listing!</div>
+                {% endif %}
+
+            {% endif %}
+        </div>
+        </div>
+        <div class="card-footer w-100 text-muted">
+            <p>Created at {{ details.publication_date }}</p>
+        </div>  
+        <div class="container">
+            <h4 class="row">Comments</h4>  
+        </div>
+        
+        <div class="container">
+            {% for comment in comments %}
+                <blockquote class="blockquote text-left">
+                    <p class="mb-0">{{comment.title}}</p>
+                    <p class="mb-0">{{comment.content}}</p>
+                    <footer class="blockquote-footer">by <cite title="Source Title">{{comment.user}}</cite></footer>
+                  </blockquote>
+                {% empty %}
+                        <p>No comments</p>
+            {% endfor %}
+        </div>
+        <div class="container">
+            <form action="{% url 'auctions:add_comment' auction %}" method="POST" style={{style}}>
+                {%csrf_token%}
+                <div class="form-group">
+                    {{comment_form}}
+                </div>
+                <div class="form-group">
+                    <input type="submit" value="Send" class="btn btn-primary mb-2">
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}

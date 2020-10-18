@@ -1,0 +1,6 @@
+{% extends 'auctions/layout.html' %}
+
+{% block body %}
+    <div>{{message}}</div>
+    <a class="nav-link" href="{% url 'auctions:auction' auction_id %}">Go back</a>
+{% endblock %}
