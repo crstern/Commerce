@@ -13,12 +13,10 @@ def get_max_price(auction_details):
     return maximum, user
 
 
-def can_be_sold(auction_details, user):
-    if user == auction_details.author:
-        price, winner = get_max_price(auction_details) 
-        return winner
-    return None
-
+def potential_winner(auction_details, user):
+    price, winner = get_max_price(auction_details) 
+    return winner
+    
 
 def can_bid(auction_details, user):
     if user == auction_details.author:
@@ -36,8 +34,8 @@ def get_auction_context(request, auction_id):
     else:
         context["min_price"], _ = get_max_price(auction_details)
 
-    winner = can_be_sold(auction_details, user)
-    if winner:
+    winner = potential_winner(auction_details, user)
+    if winner and user == auction_details.author:
         context["sell_form"] = True
     else:
         context["sell_form"] = False

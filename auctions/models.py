@@ -6,13 +6,16 @@ class User(AbstractUser):
     watchlist = models.ManyToManyField("Auction", blank=True, related_name="users")
     
 
+class Category(models.Model):
+    name = models.CharField(max_length=64)
+
 
 class Auction(models.Model):
     name = models.CharField(max_length=64)
     description = models.TextField()
     price = models.FloatField()
     image = models.URLField()
-    category = models.CharField(max_length=64)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, default=None, related_name="categories")
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="authors")
     is_sold = models.BooleanField(default=False)
     publication_date = models.DateTimeField( null=True, blank=True)

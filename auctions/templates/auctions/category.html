@@ -1,0 +1,25 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    <h2>Active Listings</h2>
+    <ul >
+        {%for auction in auctions%}
+            <a href="{% url 'auctions:auction' auction.id %}">
+                <div class="card p-3 flex-wrap flex-row" >
+                    <img src="{{ auction.image }}" alt="My image" class="card-header" style="max-width: 18rem; max-height: 350px;"/>
+                    <div class="card-block px-2">
+                        </a><h5 class="card-title">{{auction.name}}</h5>
+                        <p class="card-text">{{auction.description}} </p>
+                        <p class="card-text">Price: {{auction.price}}$</p>
+                    </div>
+                    <div class="w-100"></div>
+                    <div class="card-footer w-100 text-muted">
+                        <p>Created at {{ auction.publication_date }}</p>
+                    </div>
+                </div>
+            </a>
+        {% empty %}
+            <li>No auctions here</li>
+        {%endfor%}
+    </ul>
+{% endblock %}

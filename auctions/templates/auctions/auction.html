@@ -6,6 +6,11 @@
         <div class="card-block px-2">
             <h5 class="card-title">{{details.name}}</h5>
             <p class="card-text">{{details.description}} </p>
+            <p class="card-text">Category: 
+                <a href="{% url 'auctions:category' details.category.id %} ">
+                    {{details.category.name}}
+                </a> 
+            </p>
             <p class="card-text">Initial price: US ${{details.price}}</p>
             <form action="{% url 'auctions:add_to_watchlist' auction%}" method="POST" style={{style}}>
                     {%csrf_token%}
@@ -38,9 +43,10 @@
                 <div>Status: active</div>
             {% else %}
                 <div>Status: sold</div>
-
+                <!-- <div>winner: {{winner}}</div>
+                <div>user: {{user}}</div> -->
                 {% if winner == user %}
-                    <div>You won this listing!</div>
+                    <div>Congrats! You won this listing!</div>
                 {% endif %}
 
             {% endif %}
